@@ -2,21 +2,24 @@ import xml.dom.minidom as xml
 import os
 import types
 
-def defineInnerHTML (self, text = None):
-    if text == None:
-        for child in self.childNodes:
-            if child.nodeType == child.TEXT_NODE:
-                return child.data
-        
-        return ""
-    else:
-        for child in self.childNodes:
-            if child.nodeType == child.TEXT_NODE:
-                child.data = text
-                return True
+def defineInnerHTML(self, text = None):
+    if text is None:
+        return next(
+            (
+                child.data
+                for child in self.childNodes
+                if child.nodeType == child.TEXT_NODE
+            ),
+            "",
+        )
 
-        nodeToAdd = self.documentNode.createTextNode(text)
-        self.appendChild(nodeToAdd)
+    for child in self.childNodes:
+        if child.nodeType == child.TEXT_NODE:
+            child.data = text
+            return True
+
+    nodeToAdd = self.documentNode.createTextNode(text)
+    self.appendChild(nodeToAdd)
 
 
 class XMLParser ():
@@ -44,22 +47,21 @@ class XMLParser ():
 
         return True
     
-    def getElementById (self, id):
-        return self.select("#{}".format(id), _all = True)
+    def getElementById(self, id):
+        return self.select(f"#{id}", _all = True)
 
-    def select (self, selector, _all = False):
+    def select(self, selector, _all = False):
         sel = selector[0]
 
-        if sel == "#":
-            if _all:
-                return self.xml.getElementById(selector)
-            else:
-                return self.xml.getElementById(selector)[0]
-        else:
+        if sel != "#":
             return False
+        if _all:
+            return self.xml.getElementById(selector)
+        else:
+            return self.xml.getElementById(selector)[0]
 
-    def createElement (self, element, parent = None, attributes = {}):
-        if parent == None:
+    def createElement(self, element, parent = None, attributes = {}):
+        if parent is None:
             parent = self.rootElement
 
         element = self.xml.createElement(element)
@@ -75,8 +77,8 @@ class XMLParser ():
 
         return element
 
-    def save (self, saveName = None):
-        if saveName == None:
+    def save(self, saveName = None):
+        if saveName is None:
             saveName = self.xmlFile
 
         with open(saveName, "w") as file:
